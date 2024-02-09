@@ -13,7 +13,7 @@ DB_HOST = os.environ.get("DB_HOST")
 DB_PORT = os.environ.get("DB_PORT")
 
 
-def db(trades_data):
+def create_trades_table():
     conn_params = {
         'dbname': DB_NAME,
         'user': DB_USER,
@@ -52,7 +52,42 @@ def db(trades_data):
             comment TEXT
         )
         '''
-        cursor.execute(create_table_query)
+        cursor.execute(create_table_query)    
+
+        conn.commit()
+        print("Data inserted successfully!")
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while connecting to PostgreSQL:", error)
+
+    finally:
+        # Close the cursor and connection
+        if conn:
+            cursor.close()
+            conn.close()
+
+
+def insert_data_trades_table(trades_data):
+    conn_params = {
+        'dbname': DB_NAME,
+        'user': DB_USER,
+        'password': DB_PASSWORD,
+        'host': DB_HOST,
+        'port': DB_PORT
+    }
+    
+    try:
+        # Connect to the database
+        conn = psycopg2.connect(
+            dbname=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            host=DB_HOST,
+            port=DB_PORT
+        )
+
+        # Create a cursor object using the connection
+        cursor = conn.cursor()
 
         # Insert data into the table
         trades = trades_data['_trades']
@@ -60,6 +95,7 @@ def db(trades_data):
             cursor.execute("""
                 INSERT INTO trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (open_time) DO NOTHING
             """, (
                 trades_data['action'],
                 trade_info['_magic'],
@@ -87,10 +123,63 @@ def db(trades_data):
             cursor.close()
             conn.close()
 
-def main():
-    _zmq = DWX_ZeroMQ_Connector()
-    _zmq._DWX_MTX_GET_ALL_OPEN_TRADES_()
+
+def get_all_trades_data():
+    conn_params = {
+        'dbname': DB_NAME,
+        'user': DB_USER,
+        'password': DB_PASSWORD,
+        'host': DB_HOST,
+        'port': DB_PORT
+    }
     
+    trades_data = {'action': 'OPEN_TRADES', '_trades': {}}
+    
+    try:
+        # Connect to the database
+        conn = psycopg2.connect(**conn_params)
+        cursor = conn.cursor()
+
+        # Fetch all data from the trades table
+        cursor.execute("SELECT * FROM trades")
+        rows = cursor.fetchall()
+
+        # Loop through the rows and populate trades_data
+        for row in rows:
+            trade_id = row[0]
+            trade_info = {
+                '_magic': row[2],
+                '_symbol': row[3],
+                '_lots': row[4],
+                '_type': row[5],
+                '_open_price': row[6],
+                '_open_time': row[7].strftime('%Y.%m.%d %H:%M:%S'),
+                '_SL': row[8],
+                '_TP': row[9],
+                '_pnl': row[10],
+                '_comment': row[11]
+            }
+            trades_data['_trades'][trade_id] = trade_info
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while connecting to PostgreSQL:", error)
+
+    finally:
+        # Close the cursor and connection
+        if conn:
+            cursor.close()
+            conn.close()
+            
+    return trades_data
+
+
+def main():
+    zmq = DWX_ZeroMQ_Connector()
+    zmq._DWX_MTX_GET_ALL_OPEN_TRADES_()
+    response = zmq._get_response_()
+    
+    return response
+
 
 if __name__ == '__main__':
     #main()
@@ -125,6 +214,7 @@ if __name__ == '__main__':
         }
     }
     
-    db(trades_data=trades_data)
+    #insert_data_trades_table(trades_data=trades_data)
+    print(get_all_trades_data() == trades_data)
     
     
