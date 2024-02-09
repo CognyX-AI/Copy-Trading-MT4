@@ -1,0 +1,69 @@
+## SCREEN SIZE = 1920 x 918
+
+Login script:
+
+1. Open MT4:
+	wine '~/.wine/drive_c/Program Files (x86)/MetaTrader 4/terminal.exe' &
+	
+2. Click on add new server:
+	"xdotool mousemove --sync 860 435 click 1"
+
+3. Type Server Name:
+	"xdotool type --delay 100 "DEMO-MT4.IG.COM""
+	
+4. Press Enter:
+	"xdotool key --clearmodifiers --delay 100 "Return""
+
+5. Select newly added server:
+	"xdotool mousemove --sync 823 411 click 1"
+	
+	or
+	
+	"xdotool mousemove --sync 860 435 click 1"
+	
+	(Depending on server name)
+
+6. Press next button
+	"xdotool mousemove --sync 1085 655 click 1"
+	
+7. Select existing account:
+	"xdotool mousemove --sync 765 441 click 1"
+
+8. Click on login:
+	""xdotool mousemove --sync 765 441 click 1"
+
+9. Enter login 
+	"xdotool type --delay 100 "728226""
+
+10. Click on Password:
+	"xdotool mousemove --sync 765 494 click 1"
+
+11. Enter login 
+	"xdotool type --delay 100 "aiy7gos""
+
+12. Press finish button
+	"xdotool mousemove --sync 1085 655 click 1"
+
+13. Open options:
+	"xdotool keydown Control key o keyup Control"
+	
+14. Select Expert Advisors tab
+	"xdotool mousemove --sync 1155 332 click 1"
+
+15. Allow automated trading
+	"xdotool mousemove --sync 713 396 click 1"
+	"xdotool mousemove --sync 960 423 click 1"
+	"xdotool mousemove --sync 960 440 click 1"
+	"xdotool mousemove --sync 960 493 click 1"
+	"xdotool mousemove --sync 1056 652 click 1"
+
+ex1. Select "Add new chart"
+	"xdotool mousemove --sync 22 107 click 1"
+
+ex2. Select "Add EURUSD"
+	"xdotool mousemove --sync 72 177 click 1"
+		
+Credentials:
+Login: 728226
+Password: aiy7gos
+Investor: j0mcjgr

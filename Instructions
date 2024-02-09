@@ -1,0 +1,54 @@
+How to install MetaTrader 4 on instance:
+
+1. Download the files using:
+	
+wget https://download.mql5.com/cdn/web/metaquotes.software.corp/mt4/mt4ubuntu.sh ; chmod +x mt4ubuntu.sh ; ./mt4ubuntu.sh
+
+2. Install Xvfb:
+	"sudo apt update
+	sudo apt install xvfb"
+	
+3. Start Xvfb:
+	"Xvfb :99 -screen 0 1024x768x16 &"
+
+4. Export Display:
+	"export DISPLAY=:99"
+	
+	
+4. Install mt4setup using:
+	"wine ./mt4setup.exe /auto"
+	 
+5. Command to run MetaTrader 5
+	wine '/home/om_morendha/.wine/drive_c/Program Files (x86)/MetaTrader 4/terminal.exe'
+	
+6. Git clone dwx zeromq connector:
+	https://github.com/darwinex/dwx-zeromq-connector
+	
+7. Change directory
+	cd dwx-zeromq-connector/
+
+8. Install requirements:
+	pip install -r ./v2.0.1/python/api/requirements.txt
+	pip install pyarrow
+
+9. Transfer Libraries:
+	cp -r ~/dwx-zeromq-connector/dependencies/mql-zmq-master/Include/Mql ~/.wine/drive_c/Program\ Files\ \(x86\)/MetaTrader\ 4/MQL4/Include
+
+	cp -r ~/dwx-zeromq-connector/dependencies/mql-zmq-master/Include/Zmq ~/.wine/drive_c/Program\ Files\ \(x86\)/MetaTrader\ 4/MQL4/Include
+
+10. Transfer further libraries: 
+	cp ~/dwx-zeromq-connector/dependencies/mql-zmq-master/Library/MT4/{libsodium.dll,libzmq.dll} ~/.wine/drive_c/Program\ Files\ \(x86\)/MetaTrader\ 4/MQL4/Libraries
+
+11. Transfer mq4 to Experts
+	cp ~/dwx-zeromq-connector/v2.0.1/mql4/DWX_ZeroMQ_Server_v2.0.1_RC8.mq4 ~/.wine/drive_c/Program\ Files\ \(x86\)/MetaTrader\ 4/MQL4/Experts/
+
+12. Copy DWX_ZeroMQ_Connector_v2_0_1_RC8.py
+	"cp dwx-zeromq-connector/v2.0.1/python/api/DWX_ZeroMQ_Connector_v2_0_1_RC8.py ."
+
+13. Run MT4 in the background: 
+	wine '~/.wine/drive_c/Program Files (x86)/MetaTrader 4/terminal.exe' &
+	
+	
+Xdtool:
+
+
