@@ -8,6 +8,8 @@ flask = "*"
 requests = "*"
 python-dotenv = "*"
 psycopg2-binary = "*"
+pandas = "*"
+zmq = "*"
 
 [dev-packages]
 
