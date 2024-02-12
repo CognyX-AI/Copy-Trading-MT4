@@ -305,7 +305,7 @@ def make_trade(inserted):
         _my_trade = _zmq._generate_default_order_dict()
         
         _my_trade['_symbol'] = trade_data['_symbol']
-        _my_trade['lots'] = trade_data['_lots']
+        _my_trade['_lots'] = trade_data['_lots']
         _my_trade['_type'] = trade_data['_type']
         _my_trade['_SL'] = trade_data['_SL']
         _my_trade['_TP']= trade_data['_TP']
