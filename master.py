@@ -229,17 +229,15 @@ def insert_data_trades_table(trades_data):
 
         # Commit the transaction
         conn.commit()
+        
+        cursor.close()
+        conn.close()
+    
         print("Data inserted successfully!")
 
     except (Exception, psycopg2.Error) as error:
         print("Error while connecting to PostgreSQL:", error)
-
-    finally:
-        # Close the cursor and connection
-        if conn:
-            cursor.close()
-            conn.close()
-    
+            
     return inserted_rows_data, removed_comments
 
 
