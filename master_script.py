@@ -1,4 +1,4 @@
-#from DWX_ZeroMQ_Connector_v2_0_1_RC8 import DWX_ZeroMQ_Connector
+from DWX_ZeroMQ_Connector_v2_0_1_RC8 import DWX_ZeroMQ_Connector
 from datetime import datetime
 import psycopg2
 from dotenv import load_dotenv
@@ -313,6 +313,12 @@ def make_trade(inserted):
         
         _zmq._DWX_MTX_NEW_TRADE_(_order=_my_trade)
     
+
+def close_trades(removed):
+    for remove in removed:
+        _zmq = DWX_ZeroMQ_Connector()
+        _zmq._DWX_MTX_CLOSE_TRADES_BY_COMMENT_(removed)
+        
 
 if __name__ == '__main__':
     trades_data = {

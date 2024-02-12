@@ -18,7 +18,7 @@ wget https://download.mql5.com/cdn/web/metaquotes.software.corp/mt4/mt4ubuntu.sh
 4. Install mt4setup using:
 	"wine ./mt4setup.exe /auto"
 	 
-5. Command to run MetaTrader 5
+5. Command to run MetaTrader 4
 	wine '/home/om_morendha/.wine/drive_c/Program Files (x86)/MetaTrader 4/terminal.exe'
 	
 6. Git clone dwx zeromq connector:

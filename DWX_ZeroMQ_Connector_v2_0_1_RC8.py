@@ -350,6 +350,19 @@ class DWX_ZeroMQ_Connector():
             
         except KeyError:
             pass
+        
+    # CLOSE COMMENT
+    def _DWX_MTX_CLOSE_TRADES_BY_COMMENT_(self, _comment):
+        
+        try:
+            self.temp_order_dict['_action'] = 'CLOSE_COMMENT'
+            self.temp_order_dict['_comment'] = _comment
+            
+            # Execute
+            self._DWX_MTX_SEND_COMMAND_(**self.temp_order_dict)
+            
+        except KeyError:
+            pass
     
     # CLOSE ALL TRADES
     def _DWX_MTX_CLOSE_ALL_TRADES_(self):
