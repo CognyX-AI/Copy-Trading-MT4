@@ -13,29 +13,19 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD")
 DB_HOST = os.environ.get("DB_HOST")
 DB_PORT = os.environ.get("DB_PORT")
 
+conn = psycopg2.connect(
+    dbname=DB_NAME,
+    user=DB_USER,
+    password=DB_PASSWORD,
+    host=DB_HOST,
+    port=DB_PORT
+)
+
+cursor = conn.cursor()
+zmq = DWX_ZeroMQ_Connector()
 
 def create_trades_table():
-    conn_params = {
-        'dbname': DB_NAME,
-        'user': DB_USER,
-        'password': DB_PASSWORD,
-        'host': DB_HOST,
-        'port': DB_PORT
-    }
-    
     try:
-        # Connect to the database
-        conn = psycopg2.connect(
-            dbname=DB_NAME,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            host=DB_HOST,
-            port=DB_PORT
-        )
-
-        # Create a cursor object using the connection
-        cursor = conn.cursor()
-
         # Create table if not exists
         create_table_query = '''
         CREATE TABLE IF NOT EXISTS trades (
@@ -61,28 +51,9 @@ def create_trades_table():
     except (Exception, psycopg2.Error) as error:
         print("Error while connecting to PostgreSQL:", error)
 
-    finally:
-        # Close the cursor and connection
-        if conn:
-            cursor.close()
-            conn.close()
 
 def drop_tables(table_names):
-    conn_params = {
-        'dbname': DB_NAME,
-        'user': DB_USER,
-        'password': DB_PASSWORD,
-        'host': DB_HOST,
-        'port': DB_PORT
-    }
-    
     try:
-        # Connect to the database
-        conn = psycopg2.connect(**conn_params)
-
-        # Create a cursor object using the connection
-        cursor = conn.cursor()
-
         # Drop each table in the list
         for table_name in table_names:
             cursor.execute(f"DROP TABLE IF EXISTS {table_name} CASCADE")
@@ -93,36 +64,10 @@ def drop_tables(table_names):
 
     except (Exception, psycopg2.Error) as error:
         print("Error while connecting to PostgreSQL:", error)
-
-    finally:
-        # Close the cursor and connection
-        if conn:
-            cursor.close()
-            conn.close()
-
+        
 
 def insert_data_trades_table(trades_data):
-    conn_params = {
-        'dbname': DB_NAME,
-        'user': DB_USER,
-        'password': DB_PASSWORD,
-        'host': DB_HOST,
-        'port': DB_PORT
-    }
-    
     try:
-        # Connect to the database
-        conn = psycopg2.connect(
-            dbname=DB_NAME,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            host=DB_HOST,
-            port=DB_PORT
-        )
-
-        # Create a cursor object using the connection
-        cursor = conn.cursor()
-
         # Insert data into the table
         trades = trades_data['_trades']
         for trade_id, trade_info in trades.items():
@@ -146,38 +91,18 @@ def insert_data_trades_table(trades_data):
 
         # Commit the transaction
         conn.commit()
-        print("Data inserted successfully!")
+        #print("Data inserted successfully!")
 
     except (Exception, psycopg2.Error) as error:
         print("Error while connecting to PostgreSQL:", error)
 
-    finally:
-        # Close the cursor and connection
-        if conn:
-            cursor.close()
-            conn.close()
 
-
-def insert_data_trades_table(trades_data):
-    conn_params = {
-        'dbname': DB_NAME,
-        'user': DB_USER,
-        'password': DB_PASSWORD,
-        'host': DB_HOST,
-        'port': DB_PORT
-    }
-    
+def insert_data_trades_table(trades_data):   
     inserted_rows = []
     removed_comments = []
     inserted_rows_data = {}  # Dictionary to hold the inserted rows' data
     
     try:
-        # Connect to the database
-        conn = psycopg2.connect(**conn_params)
-
-        # Create a cursor object using the connection
-        cursor = conn.cursor()
-
         # Insert data into the table and track inserted trade_ids
         inserted_trade_ids = set()
         trades = trades_data['_trades']
@@ -226,14 +151,8 @@ def insert_data_trades_table(trades_data):
         # Delete rows from the database table that were not inserted
         if inserted_trade_ids:
             cursor.execute("DELETE FROM trades WHERE id NOT IN %s", (tuple(inserted_trade_ids),))
-
-        # Commit the transaction
-        conn.commit()
-        
-        cursor.close()
-        conn.close()
-    
-        print("Data inserted successfully!")
+            
+        #print("Data inserted successfully!")
 
     except (Exception, psycopg2.Error) as error:
         print("Error while connecting to PostgreSQL:", error)
@@ -242,21 +161,9 @@ def insert_data_trades_table(trades_data):
 
 
 def get_all_trades_data():
-    conn_params = {
-        'dbname': DB_NAME,
-        'user': DB_USER,
-        'password': DB_PASSWORD,
-        'host': DB_HOST,
-        'port': DB_PORT
-    }
-    
     trades_data = {'action': 'OPEN_TRADES', '_trades': {}}
     
     try:
-        # Connect to the database
-        conn = psycopg2.connect(**conn_params)
-        cursor = conn.cursor()
-
         # Fetch all data from the trades table
         cursor.execute("SELECT * FROM trades")
         rows = cursor.fetchall()
@@ -280,14 +187,13 @@ def get_all_trades_data():
             
             cursor.close()
             conn.close()
-    except (Exception, psycopg2.Error) as error:
+    except Exception as error:
         print("Error while connecting to PostgreSQL:", error)            
             
     return trades_data
 
 
 def insert_from_MT4():
-    zmq = DWX_ZeroMQ_Connector()
     zmq._DWX_MTX_GET_ALL_OPEN_TRADES_()
     response = zmq._get_response_()
     
@@ -304,6 +210,7 @@ def make_trade_request(inserted):
         print("Trades made successfully")
     except requests.exceptions.RequestException as e:
         print(f"Error making trades: {e}")
+
 
 def close_trade_request(removed):
     base_url = os.environ.get("BASE_URL")

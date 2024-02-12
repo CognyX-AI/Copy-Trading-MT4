@@ -351,10 +351,10 @@ if __name__ == '__main__':
         }
     }
     
-    drop_tables(['trades'])
-    create_trades_table()
-    inserted, removed = insert_data_trades_table(trades_data=trades_data)
-    #print(get_all_trades_data())
-    print(inserted)
-    print(removed)
+    #drop_tables(['trades'])
+    #create_trades_table()
+    #inserted, removed = insert_data_trades_table(trades_data=trades_data)
+    print(get_all_trades_data())
+    #print(inserted)
+    #print(removed)
     
