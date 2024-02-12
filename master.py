@@ -150,6 +150,9 @@ def insert_data_trades_table(trades_data):
             if trade_id not in inserted_rows_data:
                 removed_comments.append(row[1])
 
+        if removed_comments:
+            cursor.execute("DELETE FROM trades WHERE comment IN %s", (tuple(removed_comments),))
+
         # Commit the transaction
         conn.commit()
         #print("Data inserted successfully!")
