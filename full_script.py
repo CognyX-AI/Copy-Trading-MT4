@@ -166,7 +166,7 @@ def insert_data_trades_table(trades_data):
         'port': DB_PORT
     }
     
-    inserted_trade_ids = set()
+    inserted_rows_data = {}
     removed_comments = []
     
     try:
@@ -183,7 +183,7 @@ def insert_data_trades_table(trades_data):
                 INSERT INTO trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (comment) DO NOTHING
-                RETURNING id, comment
+                RETURNING *
             """, (
                 trades_data.get('_action', ''),  # Use get method to avoid KeyError
                 trade_info.get('_magic', 0),
@@ -201,14 +201,26 @@ def insert_data_trades_table(trades_data):
             # Fetch the inserted row's data if it doesn't conflict
             row = cursor.fetchone()
             if row:
-                inserted_trade_ids.add(row[0])
+                inserted_rows_data[row[0]] = {
+                    '_action': row[1],
+                    '_magic': row[2],
+                    '_symbol': row[3],
+                    '_lots': row[4],
+                    '_type': row[5],
+                    '_open_price': row[6],
+                    '_open_time': row[7].strftime('%Y.%m.%d %H:%M:%S'),
+                    '_SL': row[8],
+                    '_TP': row[9],
+                    '_pnl': row[10],
+                    '_comment': row[11]
+                }
 
         # Fetch all rows from the database table that were not inserted
         cursor.execute("SELECT id, comment FROM trades")
         all_rows = cursor.fetchall()
         for row in all_rows:
             trade_id = row[0]
-            if trade_id not in inserted_trade_ids:
+            if trade_id not in inserted_rows_data:
                 removed_comments.append(row[1])
 
         # Commit the transaction
@@ -224,8 +236,7 @@ def insert_data_trades_table(trades_data):
             cursor.close()
             conn.close()
     
-    return inserted_trade_ids, removed_comments
-
+    return inserted_rows_data, removed_comments
 
 
 def get_all_trades_data():

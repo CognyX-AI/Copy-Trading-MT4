@@ -1,5 +1,6 @@
 from DWX_ZeroMQ_Connector_v2_0_1_RC8 import DWX_ZeroMQ_Connector
 from datetime import datetime
+from time import sleep
 import psycopg2
 import requests
 from dotenv import load_dotenv
@@ -196,7 +197,7 @@ def insert_from_MT4():
     zmq._DWX_MTX_GET_ALL_OPEN_TRADES_()
     response = zmq._get_response_()
     
-    insert_data_trades_table(response)
+    return insert_data_trades_table(response)
     
     
 def make_trade_request(inserted):
@@ -226,7 +227,7 @@ def close_trade_request(removed):
 if __name__ == '__main__':
     
     while True:
-        trades_data = get_all_trades_data()
-        inserted, removed = insert_data_trades_table(trades_data=trades_data)
-        make_trade_request(inserted)
-        close_trade_request(removed)
+        sleep(3)
+        inserted, removed = insert_from_MT4()
+        # make_trade_request(inserted)
+        # close_trade_request(removed)
