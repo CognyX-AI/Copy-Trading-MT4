@@ -277,15 +277,11 @@ def get_all_trades_data():
                 '_comment': row[11]
             }
             trades_data['_trades'][trade_id] = trade_info
-
-    except (Exception, psycopg2.Error) as error:
-        print("Error while connecting to PostgreSQL:", error)
-
-    finally:
-        # Close the cursor and connection
-        if conn:
+            
             cursor.close()
             conn.close()
+    except (Exception, psycopg2.Error) as error:
+        print("Error while connecting to PostgreSQL:", error)            
             
     return trades_data
 
