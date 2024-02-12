@@ -98,14 +98,12 @@ def insert_data_trades_table(trades_data):
 
 
 def insert_data_trades_table(trades_data):   
-    inserted_rows = []
+    inserted_rows_data = {}
     removed_comments = []
-    inserted_rows_data = {}  # Dictionary to hold the inserted rows' data
     
     try:
         # Insert data into the table and track inserted trade_ids
-        inserted_trade_ids = set()
-        trades = trades_data['_trades']
+        trades = trades_data.get('_trades', {})
         for trade_id, trade_info in trades.items():
             cursor.execute("""
                 INSERT INTO trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment)
@@ -113,30 +111,33 @@ def insert_data_trades_table(trades_data):
                 ON CONFLICT (comment) DO NOTHING
                 RETURNING *
             """, (
-                trades_data['action'],
-                trade_info['_magic'],
-                trade_info['_symbol'],
-                trade_info['_lots'],
-                trade_info['_type'],
-                trade_info['_open_price'],
-                datetime.strptime(trade_info['_open_time'], '%Y.%m.%d %H:%M:%S'),
-                trade_info['_SL'],
-                trade_info['_TP'],
-                trade_info['_pnl'],
+                trades_data.get('_action', ''),  # Use get method to avoid KeyError
+                trade_info.get('_magic', 0),
+                trade_info.get('_symbol', ''),
+                trade_info.get('_lots', 0.0),
+                trade_info.get('_type', 0),
+                trade_info.get('_open_price', 0.0),
+                datetime.strptime(trade_info.get('_open_time', ''), '%Y.%m.%d %H:%M:%S'),
+                trade_info.get('_SL', 0.0),
+                trade_info.get('_TP', 0.0),
+                trade_info.get('_pnl', 0.0),
                 trade_id
             ))
 
             # Fetch the inserted row's data if it doesn't conflict
             row = cursor.fetchone()
             if row:
-                inserted_trade_ids.add(row[0])
-                inserted_rows.append(row[0])
                 inserted_rows_data[row[0]] = {
+                    '_action': row[1],
+                    '_magic': row[2],
                     '_symbol': row[3],
                     '_lots': row[4],
                     '_type': row[5],
+                    '_open_price': row[6],
+                    '_open_time': row[7].strftime('%Y.%m.%d %H:%M:%S'),
                     '_SL': row[8],
                     '_TP': row[9],
+                    '_pnl': row[10],
                     '_comment': row[11]
                 }
 
@@ -145,13 +146,11 @@ def insert_data_trades_table(trades_data):
         all_rows = cursor.fetchall()
         for row in all_rows:
             trade_id = row[0]
-            if trade_id not in inserted_trade_ids:
+            if trade_id not in inserted_rows_data:
                 removed_comments.append(row[1])
 
-        # Delete rows from the database table that were not inserted
-        if inserted_trade_ids:
-            cursor.execute("DELETE FROM trades WHERE id NOT IN %s", (tuple(inserted_trade_ids),))
-            
+        # Commit the transaction
+        conn.commit()
         #print("Data inserted successfully!")
 
     except (Exception, psycopg2.Error) as error:

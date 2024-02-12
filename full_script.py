@@ -166,9 +166,8 @@ def insert_data_trades_table(trades_data):
         'port': DB_PORT
     }
     
-    inserted_rows = []
+    inserted_trade_ids = set()
     removed_comments = []
-    inserted_rows_data = {}  # Dictionary to hold the inserted rows' data
     
     try:
         # Connect to the database
@@ -178,25 +177,24 @@ def insert_data_trades_table(trades_data):
         cursor = conn.cursor()
 
         # Insert data into the table and track inserted trade_ids
-        inserted_trade_ids = set()
-        trades = trades_data['_trades']
+        trades = trades_data.get('_trades', {})
         for trade_id, trade_info in trades.items():
             cursor.execute("""
                 INSERT INTO trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (comment) DO NOTHING
-                RETURNING *
+                RETURNING id, comment
             """, (
-                trades_data['action'],
-                trade_info['_magic'],
-                trade_info['_symbol'],
-                trade_info['_lots'],
-                trade_info['_type'],
-                trade_info['_open_price'],
-                datetime.strptime(trade_info['_open_time'], '%Y.%m.%d %H:%M:%S'),
-                trade_info['_SL'],
-                trade_info['_TP'],
-                trade_info['_pnl'],
+                trades_data.get('_action', ''),  # Use get method to avoid KeyError
+                trade_info.get('_magic', 0),
+                trade_info.get('_symbol', ''),
+                trade_info.get('_lots', 0.0),
+                trade_info.get('_type', 0),
+                trade_info.get('_open_price', 0.0),
+                datetime.strptime(trade_info.get('_open_time', ''), '%Y.%m.%d %H:%M:%S'),
+                trade_info.get('_SL', 0.0),
+                trade_info.get('_TP', 0.0),
+                trade_info.get('_pnl', 0.0),
                 trade_id
             ))
 
@@ -204,15 +202,6 @@ def insert_data_trades_table(trades_data):
             row = cursor.fetchone()
             if row:
                 inserted_trade_ids.add(row[0])
-                inserted_rows.append(row[0])
-                inserted_rows_data[row[0]] = {
-                    '_symbol': row[3],
-                    '_lots': row[4],
-                    '_type': row[5],
-                    '_SL': row[8],
-                    '_TP': row[9],
-                    '_comment': row[11]
-                }
 
         # Fetch all rows from the database table that were not inserted
         cursor.execute("SELECT id, comment FROM trades")
@@ -221,10 +210,6 @@ def insert_data_trades_table(trades_data):
             trade_id = row[0]
             if trade_id not in inserted_trade_ids:
                 removed_comments.append(row[1])
-
-        # Delete rows from the database table that were not inserted
-        if inserted_trade_ids:
-            cursor.execute("DELETE FROM trades WHERE id NOT IN %s", (tuple(inserted_trade_ids),))
 
         # Commit the transaction
         conn.commit()
@@ -239,7 +224,8 @@ def insert_data_trades_table(trades_data):
             cursor.close()
             conn.close()
     
-    return inserted_rows_data, removed_comments
+    return inserted_trade_ids, removed_comments
+
 
 
 def get_all_trades_data():
@@ -322,39 +308,39 @@ def close_trades(removed):
 
 if __name__ == '__main__':
     trades_data = {
-        'action': 'OPEN_TRADES',
+        '_action': 'OPEN_TRADES',
         '_trades': {
-            139859769: {
+            139986598: {
                 '_magic': 0,
-                '_symbol': 'USDJPY',
-                '_lots': 1.0,
-                '_type': 1,
-                '_open_price': 149.388,
-                '_open_time': '2024.02.09 08:01:41',
-                '_SL': 0.0,
-                '_TP': 0.0,
-                '_pnl': 8.7,
-                '_comment': 't1'
-            },
-            139859768: {
-                '_magic': 0,
-                '_symbol': 'EURUSD',
-                '_lots': 1.0,
+                '_symbol': 'USDCAD',
+                '_lots': 0.01,
                 '_type': 0,
-                '_open_price': 1.07825,
-                '_open_time': '2024.02.09 08:01:26',
+                '_open_price': 1.34654,
+                '_open_time': '2024.02.12 12:56:41',
                 '_SL': 0.0,
                 '_TP': 0.0,
-                '_pnl': 9.0,
-                '_comment': 't2'
+                '_pnl': -0.05,
+                '_comment': ''
+            },
+            139985934: {
+                '_magic': 0,
+                '_symbol': 'USDCHF',
+                '_lots': 0.01,
+                '_type': 0,
+                '_open_price': 0.87613,
+                '_open_time': '2024.02.12 12:47:32',
+                '_SL': 0.0,
+                '_TP': 0.0,
+                '_pnl': -0.82,
+                '_comment': ''
             }
         }
     }
     
     #drop_tables(['trades'])
     #create_trades_table()
-    #inserted, removed = insert_data_trades_table(trades_data=trades_data)
-    print(get_all_trades_data())
+    inserted, removed = insert_data_trades_table(trades_data=trades_data)
+    #print(get_all_trades_data())
     #print(inserted)
     #print(removed)
     
