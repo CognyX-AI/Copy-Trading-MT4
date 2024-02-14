@@ -40,8 +40,8 @@ wget https://download.mql5.com/cdn/web/metaquotes.software.corp/mt4/mt4ubuntu.sh
 	cp ~/dwx-zeromq-connector/dependencies/mql-zmq-master/Library/MT4/{libsodium.dll,libzmq.dll} ~/.wine/drive_c/Program\ Files\ \(x86\)/MetaTrader\ 4/MQL4/Libraries
 
 11. Transfer mq4 to Experts
-	cp ~/dwx-zeromq-connector/v2.0.1/mql4/DWX_ZeroMQ_Server_v2.0.1_RC8.mq4 ~/.wine/drive_c/Program\ Files\ \(x86\)/MetaTrader\ 4/MQL4/Experts/
-
+	cp ~/Copy-Trading/DWX_ZeroMQ_Connector_v2_0_1_RC8.mq4 ~/.wine/drive_c/Program\ Files\ \(x86\)/MetaTrader\ 4/MQL4/Experts/
+	
 12. Copy DWX_ZeroMQ_Connector_v2_0_1_RC8.py
 	"cp dwx-zeromq-connector/v2.0.1/python/api/DWX_ZeroMQ_Connector_v2_0_1_RC8.py ."
 

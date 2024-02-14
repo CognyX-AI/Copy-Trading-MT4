@@ -1,3 +1,4 @@
+from venv import create
 from DWX_ZeroMQ_Connector_v2_0_1_RC8 import DWX_ZeroMQ_Connector
 from datetime import datetime
 from time import sleep
@@ -25,11 +26,11 @@ conn = psycopg2.connect(
 cursor = conn.cursor()
 zmq = DWX_ZeroMQ_Connector()
 
-def create_trades_table():
+def create_trade_tables():
     try:
         # Create table if not exists
         create_table_query = '''
-        CREATE TABLE IF NOT EXISTS trades (
+        CREATE TABLE IF NOT EXISTS open_trades (
             id SERIAL PRIMARY KEY,
             action VARCHAR(50),
             magic INTEGER,
@@ -45,6 +46,25 @@ def create_trades_table():
         )
         '''
         cursor.execute(create_table_query)    
+        
+        create_table_query = '''
+        CREATE TABLE IF NOT EXISTS past_trades (
+            id SERIAL PRIMARY KEY,
+            action VARCHAR(50),
+            magic INTEGER,
+            symbol VARCHAR(50),
+            lots FLOAT,
+            type INTEGER,
+            open_price FLOAT,
+            open_time TIMESTAMP,
+            SL FLOAT,
+            TP FLOAT,
+            pnl FLOAT,
+            comment TEXT UNIQUE
+        )
+        '''
+        cursor.execute(create_table_query)    
+
 
         conn.commit()
         print("Table created successfully!")
@@ -143,7 +163,7 @@ def insert_data_trades_table(trades_data):
                 }
 
         # Fetch all rows from the database table that were not inserted
-        cursor.execute("SELECT id, comment FROM trades")
+        cursor.execute("SELECT id, comment FROM open_trades")
         all_rows = cursor.fetchall()
         for row in all_rows:
             trade_id = row[0]
@@ -151,7 +171,10 @@ def insert_data_trades_table(trades_data):
                 removed_comments.append(row[1])
 
         if removed_comments:
-            cursor.execute("DELETE FROM trades WHERE comment IN %s", (tuple(removed_comments),))
+            for comment in removed_comments:
+                cursor.execute("INSERT INTO past_trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment) SELECT action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment FROM open_trades WHERE comment = %s", (comment,))
+            
+            cursor.execute("DELETE FROM open_trades WHERE comment IN %s", (tuple(removed_comments),))
 
         # Commit the transaction
         conn.commit()
@@ -168,7 +191,7 @@ def get_all_trades_data():
     
     try:
         # Fetch all data from the trades table
-        cursor.execute("SELECT * FROM trades")
+        cursor.execute("SELECT * FROM open_trades")
         rows = cursor.fetchall()
 
         # Loop through the rows and populate trades_data
@@ -229,8 +252,9 @@ def close_trade_request(removed):
     
 if __name__ == '__main__':
     
-    while True:
-        sleep(3)
-        inserted, removed = insert_from_MT4()
+    create_trade_tables()
+    #while True:
+        #sleep(3)
+        #inserted, removed = insert_from_MT4()
         # make_trade_request(inserted)
         # close_trade_request(removed)
