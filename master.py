@@ -252,9 +252,8 @@ def close_trade_request(removed):
     
 if __name__ == '__main__':
     
-    create_trade_tables()
-    #while True:
-        #sleep(3)
-        #inserted, removed = insert_from_MT4()
+    while True:
+        sleep(3)
+        inserted, removed = insert_from_MT4()
         # make_trade_request(inserted)
         # close_trade_request(removed)
