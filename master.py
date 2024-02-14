@@ -93,7 +93,7 @@ def insert_data_trades_table(trades_data):
         trades = trades_data['_trades']
         for trade_id, trade_info in trades.items():
             cursor.execute("""
-                INSERT INTO trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment)
+                INSERT INTO open_trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT DO NOTHING
             """, (
@@ -127,7 +127,7 @@ def insert_data_trades_table(trades_data):
         trades = trades_data.get('_trades', {})
         for trade_id, trade_info in trades.items():
             cursor.execute("""
-                INSERT INTO trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment)
+                INSERT INTO open_trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (comment) DO NOTHING
                 RETURNING *
