@@ -60,7 +60,7 @@ def create_trade_tables():
             SL FLOAT,
             TP FLOAT,
             pnl FLOAT,
-            comment TEXT UNIQUE
+            comment TEXT
         )
         '''
         cursor.execute(create_table_query)    
@@ -251,6 +251,9 @@ def close_trade_request(removed):
 
     
 if __name__ == '__main__':
+    
+    # drop_tables(['open_trades', 'past_trades'])
+    # create_trade_tables()
     
     while True:
         sleep(3)

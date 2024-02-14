@@ -256,7 +256,7 @@ def get_all_trades_data():
         cursor = conn.cursor()
 
         # Fetch all data from the trades table
-        cursor.execute("SELECT * FROM trades")
+        cursor.execute("SELECT * FROM open_trades")
         rows = cursor.fetchall()
 
         # Loop through the rows and populate trades_data
