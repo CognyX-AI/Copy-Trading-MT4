@@ -9,7 +9,7 @@ wget https://download.mql5.com/cdn/web/metaquotes.software.corp/mt4/mt4ubuntu.sh
 	sudo apt install xvfb"
 	
 3. Start Xvfb:
-	"Xvfb :99 -screen 0 1024x768x16 &"
+	"Xvfb :99 -screen 0 1920x918x16 &"
 
 4. Export Display:
 	"export DISPLAY=:99"

@@ -73,6 +73,26 @@ def create_trade_tables():
         print("Error while connecting to PostgreSQL:", error)
 
 
+def create_user_table():
+    try:
+        # Create table if not exists
+        create_table_query = '''
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(50),
+            password VARCHAR(50)
+        )
+        '''
+        
+        cursor.execute(create_table_query)    
+
+        conn.commit()
+        print("Table created successfully!")
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while connecting to PostgreSQL:", error)
+
+
 def drop_tables(table_names):
     try:
         # Drop each table in the list
@@ -87,35 +107,35 @@ def drop_tables(table_names):
         print("Error while connecting to PostgreSQL:", error)
         
 
-def insert_data_trades_table(trades_data):
-    try:
-        # Insert data into the table
-        trades = trades_data['_trades']
-        for trade_id, trade_info in trades.items():
-            cursor.execute("""
-                INSERT INTO open_trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                ON CONFLICT DO NOTHING
-            """, (
-                trades_data['action'],
-                trade_info['_magic'],
-                trade_info['_symbol'],
-                trade_info['_lots'],
-                trade_info['_type'],
-                trade_info['_open_price'],
-                datetime.strptime(trade_info['_open_time'], '%Y.%m.%d %H:%M:%S'),
-                trade_info['_SL'],
-                trade_info['_TP'],
-                trade_info['_pnl'],
-                trade_id
-            ))
+# def insert_data_trades_table(trades_data):
+#     try:
+#         # Insert data into the table
+#         trades = trades_data['_trades']
+#         for trade_id, trade_info in trades.items():
+#             cursor.execute("""
+#                 INSERT INTO open_trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment)
+#                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+#                 ON CONFLICT DO NOTHING
+#             """, (
+#                 trades_data['action'],
+#                 trade_info['_magic'],
+#                 trade_info['_symbol'],
+#                 trade_info['_lots'],
+#                 trade_info['_type'],
+#                 trade_info['_open_price'],
+#                 datetime.strptime(trade_info['_open_time'], '%Y.%m.%d %H:%M:%S'),
+#                 trade_info['_SL'],
+#                 trade_info['_TP'],
+#                 trade_info['_pnl'],
+#                 trade_id
+#             ))
 
-        # Commit the transaction
-        conn.commit()
-        #print("Data inserted successfully!")
+#         # Commit the transaction
+#         conn.commit()
+#         #print("Data inserted successfully!")
 
-    except (Exception, psycopg2.Error) as error:
-        print("Error while connecting to PostgreSQL:", error)
+#     except (Exception, psycopg2.Error) as error:
+#         print("Error while connecting to PostgreSQL:", error)
 
 
 def insert_data_trades_table(trades_data):   
@@ -254,6 +274,7 @@ if __name__ == '__main__':
     
     # drop_tables(['open_trades', 'past_trades'])
     # create_trade_tables()
+    # create_user_table()
     
     while True:
         sleep(3)
