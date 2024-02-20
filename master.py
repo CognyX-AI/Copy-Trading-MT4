@@ -1,4 +1,3 @@
-from venv import create
 from DWX_ZeroMQ_Connector_v2_0_1_RC8 import DWX_ZeroMQ_Connector
 from datetime import datetime
 from time import sleep
@@ -106,37 +105,6 @@ def drop_tables(table_names):
     except (Exception, psycopg2.Error) as error:
         print("Error while connecting to PostgreSQL:", error)
         
-
-# def insert_data_trades_table(trades_data):
-#     try:
-#         # Insert data into the table
-#         trades = trades_data['_trades']
-#         for trade_id, trade_info in trades.items():
-#             cursor.execute("""
-#                 INSERT INTO open_trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment)
-#                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-#                 ON CONFLICT DO NOTHING
-#             """, (
-#                 trades_data['action'],
-#                 trade_info['_magic'],
-#                 trade_info['_symbol'],
-#                 trade_info['_lots'],
-#                 trade_info['_type'],
-#                 trade_info['_open_price'],
-#                 datetime.strptime(trade_info['_open_time'], '%Y.%m.%d %H:%M:%S'),
-#                 trade_info['_SL'],
-#                 trade_info['_TP'],
-#                 trade_info['_pnl'],
-#                 trade_id
-#             ))
-
-#         # Commit the transaction
-#         conn.commit()
-#         #print("Data inserted successfully!")
-
-#     except (Exception, psycopg2.Error) as error:
-#         print("Error while connecting to PostgreSQL:", error)
-
 
 def insert_data_trades_table(trades_data):   
     inserted_rows_data = {}
