@@ -15,6 +15,8 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD")
 DB_HOST = os.environ.get("DB_HOST")
 DB_PORT = os.environ.get("DB_PORT")
 
+MASTER_USERNAME = os.environ.get("MASTER_USERNAME")
+
 conn = psycopg2.connect(
     dbname=DB_NAME,
     user=DB_USER,
@@ -52,7 +54,8 @@ def create_trade_tables():
             SL FLOAT,
             TP FLOAT,
             pnl FLOAT,
-            comment TEXT UNIQUE
+            comment TEXT UNIQUE,
+            master_username VARCHAR(50)
         )
         '''
         cursor.execute(create_table_query)    
@@ -70,7 +73,8 @@ def create_trade_tables():
             SL FLOAT,
             TP FLOAT,
             pnl FLOAT,
-            comment TEXT
+            comment TEXT,
+            master_username VARCHAR(50)
         )
         '''
         cursor.execute(create_table_query)    
@@ -126,8 +130,8 @@ def insert_data_trades_table(trades_data):
         trades = trades_data.get('_trades', {})
         for trade_id, trade_info in trades.items():
             cursor.execute("""
-                INSERT INTO open_trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO open_trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment, master_username)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (comment) DO NOTHING
                 RETURNING *
             """, (
@@ -141,7 +145,8 @@ def insert_data_trades_table(trades_data):
                 trade_info.get('_SL', 0.0),
                 trade_info.get('_TP', 0.0),
                 trade_info.get('_pnl', 0.0),
-                trade_id
+                trade_id,
+                MASTER_USERNAME
             ))
 
             # Fetch the inserted row's data if it doesn't conflict
@@ -158,7 +163,8 @@ def insert_data_trades_table(trades_data):
                     '_SL': row[8],
                     '_TP': row[9],
                     '_pnl': row[10],
-                    '_comment': row[11]
+                    '_comment': row[11],
+                    '_master' : row[12]
                 }
 
         # Fetch all rows from the database table that were not inserted
@@ -171,7 +177,7 @@ def insert_data_trades_table(trades_data):
 
         if removed_comments:
             for comment in removed_comments:
-                cursor.execute("INSERT INTO past_trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment) SELECT action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment FROM open_trades WHERE comment = %s", (comment,))
+                cursor.execute("INSERT INTO past_trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment, master_username) SELECT action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment, master_username FROM open_trades WHERE comment = %s", (comment,))
             
             cursor.execute("DELETE FROM open_trades WHERE comment IN %s", (tuple(removed_comments),))
 
@@ -206,7 +212,8 @@ def get_all_trades_data():
                 '_SL': row[8],
                 '_TP': row[9],
                 '_pnl': row[10],
-                '_comment': row[11]
+                '_comment': row[11],
+                '_master' : row[12]
             }
             trades_data['_trades'][trade_id] = trade_info
             
@@ -235,6 +242,7 @@ def get_all_users():
 
     except (Exception, psycopg2.Error) as error:
         print("Error while fetching data from users_credentials_xstation table:", error)    
+
 
 def make_trade_request(inserted):
     base_url = os.environ.get("BASE_URL")
@@ -268,6 +276,7 @@ if __name__ == '__main__':
     
     while True:
         sleep(3)
+        users = get_all_users()
         inserted, removed = insert_from_MT4()
         # make_trade_request(inserted)
         # close_trade_request(removed)
