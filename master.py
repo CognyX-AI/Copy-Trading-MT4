@@ -9,6 +9,7 @@ import os
 load_dotenv()
 
 DB_NAME = os.environ.get("DB_NAME")
+DB_NAME_MAIN = os.environ.get("DB_NAME_MAIN")
 DB_USER = os.environ.get("DB_USER")
 DB_PASSWORD = os.environ.get("DB_PASSWORD")
 DB_HOST = os.environ.get("DB_HOST")
@@ -23,6 +24,16 @@ conn = psycopg2.connect(
 )
 
 cursor = conn.cursor()
+
+conn_user = psycopg2.connect(
+    dbname=DB_NAME_MAIN,
+    user=DB_USER,
+    password=DB_PASSWORD,
+    host=DB_HOST,
+    port=DB_PORT
+)
+
+cursor_user = conn_user.cursor()
 zmq = DWX_ZeroMQ_Connector()
 
 def create_trade_tables():
@@ -211,9 +222,20 @@ def insert_from_MT4():
     zmq._DWX_MTX_GET_ALL_OPEN_TRADES_()
     response = zmq._get_response_()
     
-    return insert_data_trades_table(response)
+    if response:
+        return insert_data_trades_table(response)
     
+    return [], []
     
+def get_all_users():
+    try:
+        cursor_user.execute("SELECT * FROM users_credentials_xstation WHERE verification = TRUE AND is_active = TRUE AND master_id_id IS NOT NULL")
+        rows = cursor_user.fetchall()
+        return rows        
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while fetching data from users_credentials_xstation table:", error)    
+
 def make_trade_request(inserted):
     base_url = os.environ.get("BASE_URL")
     url = base_url + "/make-trades"
