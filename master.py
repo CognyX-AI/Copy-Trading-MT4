@@ -236,7 +236,7 @@ def insert_from_MT4():
     
 def get_all_users():
     try:
-        cursor_user.execute("SELECT * FROM users_credentials_xstation WHERE verification = TRUE AND is_active = TRUE AND master_id_id IS NOT NULL")
+        cursor_user.execute("SELECT * FROM users_credentials_MT4 WHERE verification = TRUE AND is_active = TRUE AND master_id_id IS NOT NULL")
         rows = cursor_user.fetchall()
         return rows        
 
@@ -278,5 +278,6 @@ if __name__ == '__main__':
         sleep(3)
         users = get_all_users()
         inserted, removed = insert_from_MT4()
+        print(inserted, removed)
         # make_trade_request(inserted)
         # close_trade_request(removed)
