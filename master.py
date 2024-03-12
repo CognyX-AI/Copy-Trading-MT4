@@ -172,7 +172,8 @@ def insert_data_trades_table(trades_data):
                     '_pnl': row[10],
                     '_comment': row[11],
                     '_master' : row[12],
-                    '_is_stock' : MASTER_IS_STOCK
+                    '_is_stock' : MASTER_IS_STOCK,
+                    '_master_balance' : zmq._DWX_MTX_GET_ACCOUNT_INFO_()['data'][0]['account_balance']
                 }
 
         # Fetch all rows from the database table that were not inserted
