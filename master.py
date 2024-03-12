@@ -15,8 +15,6 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD")
 DB_HOST = os.environ.get("DB_HOST")
 DB_PORT = os.environ.get("DB_PORT")
 
-MASTER_USERNAME = os.environ.get("MASTER_USERNAME")
-
 conn = psycopg2.connect(
     dbname=DB_NAME,
     user=DB_USER,
@@ -37,6 +35,13 @@ conn_user = psycopg2.connect(
 
 cursor_user = conn_user.cursor()
 zmq = DWX_ZeroMQ_Connector()
+
+MASTER_ID = os.environ.get("MASTER_ID")
+sql_query = "SELECT username, password, account_type_stock FROM connector WHERE id = %s"
+cursor_user.execute(sql_query, (MASTER_ID,))
+result = cursor_user.fetchone()
+
+MASTER_USERNAME, MASTER_PASSWORD, MASTER_IS_STOCK = result
 
 def create_trade_tables():
     try:
@@ -164,7 +169,8 @@ def insert_data_trades_table(trades_data):
                     '_TP': row[9],
                     '_pnl': row[10],
                     '_comment': row[11],
-                    '_master' : row[12]
+                    '_master' : row[12],
+                    '_is_stock' : MASTER_IS_STOCK
                 }
 
         # Fetch all rows from the database table that were not inserted
