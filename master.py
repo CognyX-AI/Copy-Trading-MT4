@@ -37,7 +37,7 @@ cursor_user = conn_user.cursor()
 zmq = DWX_ZeroMQ_Connector()
 
 MASTER_ID = os.environ.get("MASTER_ID")
-sql_query = "SELECT username, password, account_type_stock FROM connector WHERE id = %s"
+sql_query = "SELECT username, password, account_type_stock FROM users_credentials_master_mt4 WHERE id = %s"
 cursor_user.execute(sql_query, (MASTER_ID,))
 result = cursor_user.fetchone()
 
