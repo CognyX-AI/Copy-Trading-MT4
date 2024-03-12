@@ -135,7 +135,7 @@ def insert_data_trades_table(trades_data):
         trades = trades_data.get('_trades', {})
         orders = []
         for trade_id, trade_info in trades.items():
-            orders.append(trade_id)
+            orders.append(str(trade_id))
             cursor.execute("""
                 INSERT INTO open_trades (action, magic, symbol, lots, type, open_price, open_time, SL, TP, pnl, comment, master_username)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -179,7 +179,7 @@ def insert_data_trades_table(trades_data):
         cursor.execute("SELECT id, comment FROM open_trades")
         all_rows = cursor.fetchall()
         for row in all_rows:
-            trade_id = row[0]
+            trade_id = row[1]
             if trade_id not in orders:
                 removed_comments.append(row[1])
 
