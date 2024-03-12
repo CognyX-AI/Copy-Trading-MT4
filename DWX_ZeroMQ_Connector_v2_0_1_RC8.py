@@ -229,7 +229,7 @@ class DWX_ZeroMQ_Connector():
         
         if self._PUSH_SOCKET_STATUS['state'] == True:
             try:
-                _socket.send_string(_data, zmq.DONTWAIT)
+                return _socket.send_string(_data, zmq.DONTWAIT)
             except zmq.error.Again:
                 print("\nResource timeout.. please try again.")
                 sleep(self._sleep_delay)
@@ -474,7 +474,7 @@ class DWX_ZeroMQ_Connector():
                                                          _ticket)
         
         # Send via PUSH Socket
-        self.remote_send(self._PUSH_SOCKET, _msg)
+        return self.remote_send(self._PUSH_SOCKET, _msg)
         
         """
          compArray[0] = TRADE or DATA
@@ -729,7 +729,7 @@ class DWX_ZeroMQ_Connector():
             self.temp_order_dict['_action'] = 'GET_ACCOUNT_INFO'
 
             # Execute
-            self._DWX_MTX_SEND_COMMAND_(**self.temp_order_dict)
+            return self._DWX_MTX_SEND_COMMAND_(**self.temp_order_dict)
 
         except Exception as ex:
             _exstr = "Exception Type {0}. Args:\n{1!r}"
