@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import os
 from io import StringIO
 import sys
-
+import ast
 
 load_dotenv()
 
@@ -38,15 +38,6 @@ conn_user = psycopg2.connect(
 
 cursor_user = conn_user.cursor()
 zmq = DWX_ZeroMQ_Connector()
-
-buffer = StringIO()
-sys.stdout = buffer
-
-zmq._DWX_MTX_GET_ACCOUNT_INFO_()
-print_output = buffer.getvalue()
-sys.stdout = sys.__stdout__
-
-print('hello: ', print_output)
 
 MASTER_ID = os.environ.get("MASTER_ID")
 sql_query = "SELECT username, password, account_type_stock FROM users_credentials_master_mt4 WHERE id = %s"
@@ -144,6 +135,14 @@ def insert_data_trades_table(trades_data):
     
     try:
         # Insert data into the table and track inserted trade_ids
+        
+        buffer = StringIO()
+        sys.stdout = buffer
+        zmq._DWX_MTX_GET_ACCOUNT_INFO_()
+        print_output = buffer.getvalue()
+        sys.stdout = sys.__stdout__
+        account_dic = ast.literal_eval(print_output)
+                
         trades = trades_data.get('_trades', {})
         orders = []
         for trade_id, trade_info in trades.items():
@@ -184,8 +183,8 @@ def insert_data_trades_table(trades_data):
                     '_pnl': row[10],
                     '_comment': row[11],
                     '_master' : row[12],
-                    '_is_stock' : MASTER_IS_STOCK
-                   # '_master_balance' : zmq._DWX_MTX_GET_ACCOUNT_INFO_()['data'][0]['account_balance']
+                    '_is_stock' : MASTER_IS_STOCK,
+                    '_master_balance' : account_dic['data'][0]['account_balance']
                 }
 
         # Fetch all rows from the database table that were not inserted
