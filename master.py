@@ -236,12 +236,12 @@ def insert_from_MT4():
     
 def get_all_users():
     try:
-        cursor_user.execute("SELECT * FROM users_credentials_MT4 WHERE verification = TRUE AND is_active = TRUE AND master_id_id IS NOT NULL")
+        cursor_user.execute("SELECT * FROM users_credentials_MT4 WHERE verification = TRUE AND is_active = TRUE AND master_username_id IS NOT NULL")
         rows = cursor_user.fetchall()
         return rows        
 
     except (Exception, psycopg2.Error) as error:
-        print("Error while fetching data from users_credentials_xstation table:", error)    
+        print("Error while fetching data from users_credentials_MT4 table:", error)    
 
 
 def make_trade_request(inserted):
